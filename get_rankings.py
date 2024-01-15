@@ -46,14 +46,17 @@ def scrape_page(driver):
 
 
 def navigate_to_next_page(driver):
-    """Navigate to the next page."""
+    """Navigate to the next page if possible."""
     try:
         next_button = driver.find_element(By.CLASS_NAME, "ant-pagination-next")
+        if "ant-pagination-disabled" in next_button.get_attribute("class"):
+            print("No more pages to navigate.")
+            return False
         next_button.click()
         time.sleep(5)  # Wait for the next page to load
         return True
     except Exception as e:
-        print("No more pages or an error occurred:", e)
+        print("An error occurred:", e)
         return False
 
 
@@ -63,10 +66,10 @@ def main(url):
     driver.get(url)
     time.sleep(5)  # Wait for the page to fully load
 
-    select_us_filter(driver)
+    select_us_filter(driver)  # Select the United States filter
 
     all_data = []
-    for _ in range(10):  # Assuming a maximum of 10 pages for simplicity
+    while True:
         all_data.extend(scrape_page(driver))
         if not navigate_to_next_page(driver):
             break
